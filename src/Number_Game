@@ -1,0 +1,126 @@
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField; 
+import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
+
+import java.util.Random;
+
+
+public class NumberGuessingGame extends Application {
+
+    private static final int MAX_ATTEMPTS = 10;
+    private static final int MAX_ROUNDS = 3;
+    private int currentRound;
+    private int totalScore;
+
+    private int randomNumber;
+    private int attempts;
+
+    public static void main(String[] args) {
+        launch(args);
+    
+    }
+    
+    @Override
+    public void start(Stage primaryStage) {
+
+        initializeGame();
+
+        Label titleLabel = new Label("Number Guessig Game");
+        Label promptLabel = new Label("Enter your guess");
+        TextField guessField = new TextField();
+        Button guessButton = new Button("Guess");
+        Label resultLabel = new Label("");
+        
+        
+        GridPane gridPane = new GridPane();
+        gridPane.setAlignment(Pos.CENTER);
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+        gridPane.setPadding(new Insets(25, 2, 25, 25));
+
+
+        gridPane.add(titleLabel,0 ,0 ,2 ,1);
+        gridPane.add(promptLabel, 0, 1);
+        gridPane.add(guessField, 1, 1);
+        gridPane.add(guessButton, 1, 2);
+        gridPane.add(resultLabel, 0, 3, 2, 1);
+
+        guessButton.setOnAction(event -> {
+            handleGuess(Integer.parseInt(guessField.getText()),resultLabel);
+            guessField.clear();
+        }); 
+
+        Scene scene = new Scene(gridPane, 400, 200);
+        primaryStage.setTitle("Number Guessing Game");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+    }
+
+    private void initializeGame(){ 
+        currentRound = 1;
+        totalScore = 0;
+        startNewRound();
+    }
+ 
+    private void startNewRound() {
+        Random rand = new Random();
+        randomNumber = rand.nextInt(100) + 1;
+        attempts = 0;
+
+    }
+    private void handleGuess(int guess, Label resultLabel) {
+        attempts++;
+
+        if (guess == randomNumber) {
+
+            int roundScore = MAX_ATTEMPTS - attempts + 1;
+            totalScore += roundScore;
+            displayResult("Congratulations! You guessed the number in " + attempts + " attempts. Round Score:" + roundScore + ". Total Score:" + totalScore, Alert.AlertType.INFORMATION );
+          
+            if (currentRound < MAX_ROUNDS) {
+                currentRound++;
+                startNewRound();
+            } else {
+                displayResult("Game Over. Total Score:" + totalScore, Alert.AlertType.INFORMATION);
+                initializeGame();
+            }
+        
+        } else if (attempts == MAX_ATTEMPTS) {
+
+            displayResult("Sorry! You've reached the maximum number of attempts. The correct number is " + randomNumber + ". Round Score: 0. Total Score: " + totalScore,
+            Alert.AlertType.WARNING);
+
+            if (currentRound < MAX_ROUNDS) {
+                currentRound++;
+                startNewRound();
+            } else {
+                displayResult("Game Over. Total Score: " + totalScore, Alert.AlertType.INFORMATION);
+                initializeGame();
+            }
+ 
+        } else if (guess < randomNumber) {
+             displayResult("Too low! Try again.", Alert.AlertType.WARNING);
+            
+        } else  {
+            displayResult("Too high! Try again.", Alert.AlertType.WARNING);
+
+        }
+    }
+     
+    private void displayResult(String message, Alert.AlertType alertType) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle("Result");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+}
+
